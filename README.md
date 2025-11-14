@@ -2,7 +2,7 @@
 🌐 [Hugging Face Dataset](https://huggingface.co/datasets/ChengYuQi99/MiniShift)  
 
 
-> 📚 [**Paper**](https://arxiv.org/abs/2507.07435) • 🏠 [**Homepage**](https://hustcyq.github.io/MiniShift-Simple3D)  
+> 📚 [**Paper**](https://arxiv.org/abs/2507.07435) • 🏠 [**Homepage**](https://yuxin-jiang.github.io/Anomagic)  
 > by , [Yuqi Cheng*](https://hustcyq.github.io/), [Yihan Sun*](), [Hui Zhang]() [Weiming Shen](https://scholar.google.com/citations?user=FuSHsx4AAAAJ&hl=en), [Yunkang Cao](https://caoyunkang.github.io/)
 
 
