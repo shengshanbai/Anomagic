@@ -156,10 +156,10 @@ For complete code examples and tunable parameters (e.g., prompts, scales, masks)
 
 ## 💌 Acknowledgement
 
-Our generation pipeline is based on the [🤗Diffusers](https://github.com/huggingface/diffusers) library, incorporating implementations from [Prompt-to-Prompt](https://github.com/google/prompt-to-prompt/) and [Attend-and-Excite](https://github.com/yuval-alaluf/Attend-and-Excite).
-We also adapt implementation from [StyleCLIP](https://github.com/orpatashnik/StyleCLIP) for part of our CLIP loss implementation.
+Our generation pipeline is based on the [🤗Diffusers](https://github.com/huggingface/diffusers) library, incorporating implementations from [IP-Adapter](https://github.com/tencent-ailab/IP-Adapter).
 
 Big thanks to these amazing open-source works!
+
 
 ## 📝 Citation
 If you find our work useful in your research please consider citing our paper:
