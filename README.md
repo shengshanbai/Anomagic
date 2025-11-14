@@ -26,7 +26,7 @@
 [//]: # (    </h4>)
 [//]: # (</div>)
 
-[[Project Page]](https://github.com/yuxin-jiang.github.io/Anomagic) [[Paper]](https://arxiv.org/abs/2501.12345) [[HuggingFace Demo (coming soon)]](https://huggingface.co/spaces/yuxin-jiang/Anomagic)
+[[Project Page]](https://yuxin-jiang.github.io/Anomagic) [[Paper]](https://arxiv.org/abs/2501.12345) [[HuggingFace Demo (coming soon)]](https://huggingface.co/spaces/yuxin-jiang/Anomagic)
 
 ![teaser](imgs/teaser_anomagic.png)
 
