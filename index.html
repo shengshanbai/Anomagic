@@ -145,7 +145,7 @@
   </div>
 </section>
 
-<!-- Method Section - 仅保留Method内容，移除轮播 -->
+<!-- Method Section -->
 <section class="section">
   <div class="container is-max-desktop">
     <h2 class="title is-3 has-text-centered section-title">Method</h2>
@@ -166,11 +166,11 @@
   </div>
 </section>
 
-<!-- Inference Results -->
+<!-- Zero-shot Generation Results under prompts in AnomVerse -->
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered section-title">Anomaly Inference Results</h2>
-    <div id="results-carousel" class="carousel results-carousel">
+    <h2 class="title is-3 has-text-centered section-title">Zero-shot Generation Results under Prompts in AnomVerse</h2>
+    <div id="anomverse-carousel" class="carousel results-carousel">
       <!-- Industrial Datasets -->
       <div class="item">
         <div class="columns is-multiline">
@@ -214,6 +214,53 @@
   </div>
 </section>
 
+<!-- Zero-shot Generation Results under User Defined Prompts -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered section-title">Zero-shot Generation Results under User Defined Prompts</h2>
+    <div id="userprompts-carousel" class="carousel results-carousel">
+      <!-- Few-shot Industrial Datasets -->
+      <div class="item">
+        <div class="columns is-multiline">
+          <div class="column is-full has-text-centered">
+            <h3 class="subtitle is-4 carousel-subtitle">Industrial Datasets (VisA & MVTecAD)</h3>
+            <p class="is-size-6 has-text-grey carousel-desc">Few-shot anomaly generation results on industrial objects with user-defined prompts.</p>
+          </div>
+          <div class="column is-full has-text-centered">
+            <img src="static/images/few_mvtec_visa.png" alt="Few-shot VisA & MVTecAD Example" style="width: 80%; max-width: 800px;"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Few-shot Medical Imaging -->
+      <div class="item">
+        <div class="columns is-multiline">
+          <div class="column is-full has-text-centered">
+            <h3 class="subtitle is-4 carousel-subtitle">Medical Imaging</h3>
+            <p class="is-size-6 has-text-grey carousel-desc">Few-shot medical anomaly generation with custom prompt guidance.</p>
+          </div>
+          <div class="column is-full has-text-centered">
+            <img src="static/images/few_medical.png" alt="Few-shot Medical Example" style="width: 80%; max-width: 800px;"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Few-shot Web Objects -->
+      <div class="item">
+        <div class="columns is-multiline">
+          <div class="column is-full has-text-centered">
+            <h3 class="subtitle is-4 carousel-subtitle">Web-Crawled Real-World Objects</h3>
+            <p class="is-size-6 has-text-grey carousel-desc">Few-shot generation results on everyday items with user-specified anomaly descriptions.</p>
+          </div>
+          <div class="column is-full has-text-centered">
+            <img src="static/images/few_web.png" alt="Few-shot Web Example" style="width: 80%; max-width: 800px;"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- BibTeX Citation -->
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
@@ -243,10 +290,20 @@
   </div>
 </footer>
 
-<!-- Carousel Initialization Script - 仅保留结果轮播初始化 -->
+<!-- Carousel Initialization Script -->
 <script>
   $(document).ready(function() {
-    $('#results-carousel').carousel({
+    // 初始化AnomVerse结果轮播
+    $('#anomverse-carousel').carousel({
+      slidesPerPage: 1,
+      loop: true,
+      autoplay: true,
+      autoplaySpeed: 5000,
+      pagination: true
+    });
+    
+    // 初始化用户自定义提示结果轮播
+    $('#userprompts-carousel').carousel({
       slidesPerPage: 1,
       loop: true,
       autoplay: true,
