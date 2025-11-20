@@ -53,6 +53,13 @@ Activate the environment:
 ```bash
 conda activate Anomagic  # Or the name specified in env.yml
 ```
+## Download Models
+
+You can download the required pretrained models from the [h94/IP-Adapter repository on Hugging Face](https://huggingface.co/h94/IP-Adapter). To run the training script, you should also download the following models and place them in the specified directories:
+
+- **IP-Adapter weights** (`ip-adapter_sd15.bin`): Place in the `models/` folder.
+- **Image Encoder weights** (`model.safetensors and pytorch_model.bin`): Place in the `models/image_encoder/` folder.
+- **Checkpoints**: (`longclip-B.pt and longclip-L.pt`): Place in the `models/` folder.
 
 ## 🚀 Workflow
 Follow these steps to prepare data, train models, and generate synthetic anomaly images. The pipeline is designed for VisA and MVTec datasets.
