@@ -141,7 +141,7 @@ class SelfAttention(nn.Module):
         return out
 
 
-class IPAdapter:
+class Anomagic:
     def __init__(self, sd_pipe, image_encoder_path, ip_ckpt, ip_ckpt_1, device, num_tokens=4):
         self.device = device
         self.image_encoder_path = image_encoder_path
@@ -150,7 +150,7 @@ class IPAdapter:
         self.num_tokens = num_tokens
         self.attention_module = SelfAttention(1280, device)
         self.pipe = sd_pipe.to(self.device)
-        self.set_ip_adapter()
+        self.set_anomagic()
 
         # load image encoder
         self.image_encoder = CLIPVisionModelWithProjection.from_pretrained(self.image_encoder_path).to(
@@ -161,7 +161,7 @@ class IPAdapter:
         # image proj model
         self.image_proj_model = self.init_proj()
 
-        self.load_ip_adapter()
+        self.load_anomagic()
 
     def init_proj(self):
         image_proj_model = ImageProjModel(
@@ -172,7 +172,7 @@ class IPAdapter:
 
         return image_proj_model
 
-    def set_ip_adapter(self):
+    def set_anomagic(self):
         unet = self.pipe.unet
         attn_procs = {}
         for name in unet.attn_processors.keys():
@@ -203,7 +203,7 @@ class IPAdapter:
             else:
                 self.pipe.controlnet.set_attn_processor(CNAttnProcessor(num_tokens=self.num_tokens))
 
-    def load_ip_adapter(self):
+    def load_anomagic(self):
         if os.path.splitext(self.ip_ckpt)[-1] == ".safetensors":
             state_dict = {"image_proj": {}, "ip_adapter": {}}
             with safe_open(self.ip_ckpt, framework="pt", device="cpu") as f:
@@ -217,15 +217,8 @@ class IPAdapter:
         self.image_proj_model.load_state_dict(state_dict["image_proj"])
         ip_layers = torch.nn.ModuleList(self.pipe.unet.attn_processors.values())
         ip_layers.load_state_dict(state_dict["ip_adapter"])
-        print("unet的参数列表：")
-        for name, param in self.pipe.unet.named_parameters():
-            print(name)
         self.pipe.unet.load_state_dict(state_dict["unet"])
         state_dict_1 = torch.load(self.ip_ckpt_1, map_location="cpu")
-        # 打印attention_module的所有参数名称
-        print("self.attention_module的参数列表：")
-        for name, param in self.attention_module.named_parameters():
-            print(name)
         self.attention_module.load_state_dict(state_dict_1["att"])
 
     @torch.inference_mode()
@@ -544,7 +537,7 @@ class IPAdapter:
         return images
 
 
-class IPAdapterXL(IPAdapter):
+class AnomagicXL(Anomagic):
     """SDXL"""
 
     def generate(
@@ -609,8 +602,8 @@ class IPAdapterXL(IPAdapter):
         return images
 
 
-class IPAdapterPlus(IPAdapter):
-    """IP-Adapter with fine-grained features"""
+class AnomagicPlus(Anomagic):
+    """Anomagic with fine-grained features"""
 
     def init_proj(self):
         image_proj_model = Resampler(
@@ -640,8 +633,8 @@ class IPAdapterPlus(IPAdapter):
         return image_prompt_embeds, uncond_image_prompt_embeds
 
 
-class IPAdapterFull(IPAdapterPlus):
-    """IP-Adapter with full features"""
+class AnomagicFull(AnomagicPlus):
+    """Anomagic with full features"""
 
     def init_proj(self):
         image_proj_model = MLPProjModel(
@@ -651,7 +644,7 @@ class IPAdapterFull(IPAdapterPlus):
         return image_proj_model
 
 
-class IPAdapterPlusXL(IPAdapter):
+class AnomagicPlusXL(Anomagic):
     """SDXL"""
 
     def init_proj(self):
