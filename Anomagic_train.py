@@ -1,6 +1,6 @@
 import os
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 import torch.nn as nn
 import math
@@ -213,7 +213,7 @@ class SelfAttention(nn.Module):
         return out
 
 
-class IPAdapter(torch.nn.Module):
+class Anomagic(torch.nn.Module):
     def __init__(self, unet, image_proj_model, adapter_modules, ckpt_path=None):
         super().__init__()
         self.unet = unet
@@ -224,23 +224,23 @@ class IPAdapter(torch.nn.Module):
             self.load_from_checkpoint(ckpt_path)
 
     def forward(self, noisy_latents, timesteps, encoder_hidden_states, image_embeds):
-        ip_tokens = self.image_proj_model(image_embeds)
-        encoder_hidden_states = torch.cat([encoder_hidden_states, ip_tokens], dim=1)
+        anomagic_tokens = self.image_proj_model(image_embeds)
+        encoder_hidden_states = torch.cat([encoder_hidden_states, anomagic_tokens], dim=1)
         noise_pred = self.unet(noisy_latents, timesteps, encoder_hidden_states).sample
         return noise_pred
 
     def load_from_checkpoint(self, ckpt_path: str):
-        orig_ip_proj_sum = torch.sum(torch.stack([torch.sum(p) for p in self.image_proj_model.parameters()]))
+        orig_proj_sum = torch.sum(torch.stack([torch.sum(p) for p in self.image_proj_model.parameters()]))
         orig_adapter_sum = torch.sum(torch.stack([torch.sum(p) for p in self.adapter_modules.parameters()]))
 
         state_dict = torch.load(ckpt_path, map_location="cpu")
         self.image_proj_model.load_state_dict(state_dict["image_proj"], strict=True)
         self.adapter_modules.load_state_dict(state_dict["ip_adapter"], strict=True)
 
-        new_ip_proj_sum = torch.sum(torch.stack([torch.sum(p) for p in self.image_proj_model.parameters()]))
+        new_proj_sum = torch.sum(torch.stack([torch.sum(p) for p in self.image_proj_model.parameters()]))
         new_adapter_sum = torch.sum(torch.stack([torch.sum(p) for p in self.adapter_modules.parameters()]))
 
-        assert orig_ip_proj_sum != new_ip_proj_sum, "Weights of image_proj_model did not change!"
+        assert orig_proj_sum != new_proj_sum, "Weights of image_proj_model did not change!"
         assert orig_adapter_sum != new_adapter_sum, "Weights of adapter_modules did not change!"
 
         print(f"Successfully loaded weights from checkpoint {ckpt_path}")
@@ -265,31 +265,31 @@ def parse_args():
     parser.add_argument(
         "--pretrained_ip_adapter_path",
         type=str,
-        default='/home/jiangyuxin/CODE/My_paper/Anomagic/models/ip-adapter_sd15.bin',
+        default="models/ip-adapter_sd15.bin",
         help="Path to pretrained ip adapter model.",
     )
     parser.add_argument(
         "--data_json_file",
         type=str,
-        default="/home/jiangyuxin/CODE/Datasets/merged_ad_datasets_cover1_copped.json",
+        default="Datasets/merged_ad_datasets_cover1_copped.json",
         help="Training data JSON file path",
     )
     parser.add_argument(
         "--datasets_root",
         type=str,
-        default="/home/jiangyuxin/CODE/Datasets",
+        default="Datasets",
         help="Root directory for datasets",
     )
     parser.add_argument(
         "--image_encoder_path",
         type=str,
-        default='/home/jiangyuxin/CODE/My_paper/Anomagic/models/image_encoder/',
+        default="models/image_encoder",
         help="Path to CLIP image encoder",
     )
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="/home/jiangyuxin/CODE/My_paper/Anomagic/sd-ip_adapter_short_text_cover1_copped",
+        default="sd-anomagic_short_text_cover1_copped",
         help="The output directory where the model predictions and checkpoints will be written.",
     )
     parser.add_argument(
@@ -439,7 +439,7 @@ def main():
     text_encoder.requires_grad_(False)
     image_encoder.requires_grad_(False)
 
-    # Initialize IP-Adapter
+    # Initialize Anomagic projection model
     image_proj_model = ImageProjModel(
         cross_attention_dim=unet.config.cross_attention_dim,
         clip_embeddings_dim=image_encoder.config.projection_dim,
@@ -475,8 +475,8 @@ def main():
     unet, lora_layers = load_lora_model(unet, accelerator.device, 4e-4)
     adapter_modules = torch.nn.ModuleList(unet.attn_processors.values())
 
-    # Initialize IP-Adapter model
-    ip_adapter = IPAdapter(unet, image_proj_model, adapter_modules, args.pretrained_ip_adapter_path)
+    # Initialize Anomagic model
+    anomagic_model = Anomagic(unet, image_proj_model, adapter_modules, args.pretrained_ip_adapter_path)
     attention_module = SelfAttention(1280)
 
     # Set mixed precision
@@ -495,8 +495,8 @@ def main():
 
     # Initialize optimizer
     params_to_opt = itertools.chain(
-        ip_adapter.image_proj_model.parameters(),
-        ip_adapter.adapter_modules.parameters(),
+        anomagic_model.image_proj_model.parameters(),
+        anomagic_model.adapter_modules.parameters(),
         lora_layers,
         attention_module.parameters()
     )
@@ -522,21 +522,21 @@ def main():
     )
 
     # Prepare all components for distributed training
-    ip_adapter, attention_module, optimizer, train_dataloader = accelerator.prepare(
-        ip_adapter, attention_module, optimizer, train_dataloader
+    anomagic_model, attention_module, optimizer, train_dataloader = accelerator.prepare(
+        anomagic_model, attention_module, optimizer, train_dataloader
     )
 
     # Training loop
     global_step = 0
     for epoch in range(args.num_train_epochs):
         begin = time.perf_counter()
-        ip_adapter.train()
+        anomagic_model.train()
         attention_module.train()
 
         for step, batch in enumerate(train_dataloader):
 
             load_data_time = time.perf_counter() - begin
-            with accelerator.accumulate(ip_adapter):
+            with accelerator.accumulate(anomagic_model):
                 # Encode images to latent space
                 with torch.no_grad():
                     latents = vae.encode(batch["images"].to(weight_dtype)).latent_dist.sample()
@@ -579,7 +579,7 @@ def main():
                 image_embeds = attention_module(last_feature_layer_output[:, :256, :], batch["masks"].unsqueeze(1))
 
                 # Forward pass
-                noise_pred = ip_adapter(noisy_latents, timesteps, encoder_hidden_states, image_embeds)
+                noise_pred = anomagic_model(noisy_latents, timesteps, encoder_hidden_states, image_embeds)
 
                 # Compute loss
                 loss = (F.mse_loss(noise_pred.float(), noise.float(), reduction="none") * batch["masks"].unsqueeze(
@@ -608,18 +608,18 @@ def main():
                 checkpoint_dir = os.path.join(args.output_dir, f"checkpoint-{global_step}")
                 os.makedirs(checkpoint_dir, exist_ok=True)
                 print(f"Checkpoint dir: {checkpoint_dir}")
-                ip_adapter_save_path = os.path.join(checkpoint_dir, f"ip-adapter-{global_step}.bin")
+                anomagic_save_path = os.path.join(checkpoint_dir, f"anomagic-{global_step}.bin")
                 attention_module_save_path = os.path.join(checkpoint_dir, f"attention_module-{global_step}.bin")
-                torch.save(ip_adapter.state_dict(), ip_adapter_save_path)
+                anomagic_model.save_checkpoint(anomagic_save_path)
                 torch.save(attention_module.state_dict(), attention_module_save_path)
             begin = time.perf_counter()
 
     if accelerator.is_main_process:
         checkpoint_dir = os.path.join(args.output_dir, f"checkpoint-{global_step}")
         os.makedirs(checkpoint_dir, exist_ok=True)
-        ip_adapter_save_path = os.path.join(checkpoint_dir, f"ip-adapter-{global_step}.bin")
+        anomagic_save_path = os.path.join(checkpoint_dir, f"anomagic-{global_step}.bin")
         attention_module_save_path = os.path.join(checkpoint_dir, f"attention_module-{global_step}.bin")
-        torch.save(ip_adapter.state_dict(), ip_adapter_save_path)
+        anomagic_model.save_checkpoint(anomagic_save_path)
         torch.save(attention_module.state_dict(), attention_module_save_path)
 
 
