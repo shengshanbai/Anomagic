@@ -271,7 +271,7 @@ def parse_args():
     parser.add_argument(
         "--data_json_file",
         type=str,
-        default="Datasets/merged_ad_datasets_cover1_copped.json",
+        default="Datasets/merged_ad_datasets.json",
         help="Training data JSON file path",
     )
     parser.add_argument(
@@ -289,7 +289,7 @@ def parse_args():
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="sd-anomagic_short_text_cover1_copped",
+        default="sd-anomagic",
         help="The output directory where the model predictions and checkpoints will be written.",
     )
     parser.add_argument(
