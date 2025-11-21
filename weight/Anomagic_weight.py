@@ -2,8 +2,8 @@ import torch
 import os
 import argparse
 
-parser = argparse.ArgumentParser(description="Process IP adapter and attention module checkpoints")
-parser.add_argument("--ckpt_ip", type=str, required=True, help="Path to IP adapter checkpoint")
+parser = argparse.ArgumentParser(description="Process anomagic and attention module checkpoints")
+parser.add_argument("--ckpt_anomagic", type=str, required=True, help="Path to anomagic checkpoint")
 parser.add_argument("--ckpt_att", type=str, required=True, help="Path to attention module checkpoint")
 args = parser.parse_args()
 
@@ -29,7 +29,7 @@ for key in image_proj_sd.keys():
     print(f"- {key}")
 
 ckpt_dir = os.path.dirname(args.ckpt_ip)
-save_path_ip = os.path.join(ckpt_dir, "ip_adapter_0.bin")
+save_path_ip = os.path.join(ckpt_dir, "anomagic_0.bin")
 torch.save({"image_proj": image_proj_sd, "ip_adapter": ip_sd, "unet": unet}, save_path_ip)
 print(f"Model saved to: {save_path_ip}")
 
