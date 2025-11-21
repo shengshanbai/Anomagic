@@ -249,7 +249,7 @@ class BatchAnomalyGenerator:
 
 
                 mask_image = Image.fromarray(reference_mask_binary)
-                mask_image                                                = reference_mask
+                mask_image = reference_mask
 
                 print(f"Processing reference {ref_idx}: {ref_data['image_path']}")
                 print(f"Reference image mode: {reference_image.mode}, size: {reference_image.size}")
@@ -363,7 +363,6 @@ class BatchAnomalyGenerator:
 
 def main():
     parser = argparse.ArgumentParser(description="Anomaly Image Generation with Quality Control")
-
     parser.add_argument("--ip_ckpt", type=str, default="checkpoints/anomagic_0.bin",
                         help="IP Adapter模型 checkpoint 路径")
     parser.add_argument("--ip_ckpt_1", type=str, default="checkpoints/att.bin",
