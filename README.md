@@ -80,7 +80,7 @@ Use Doubao (a text generation tool) to create descriptive prompts for given defe
 These prompts will guide the anomaly synthesis during generation.
 
 ### 3. Training with Anomagic_train.py
-Train the IP-Adapter model using the prepared JSON data:
+Train the Anomagic model using the prepared JSON data:
 ```bash
 python Anomagic_train.py \
     --data_json_file /path/to/your/dataset.json \
@@ -121,7 +121,7 @@ python Anomagic_test.py \
     --mask_base /path/to/generated/masks \
     --output_base /path/to/generated/anomalies
 ```
-- `--ip_ckpt`: Path to the trained IP-Adapter checkpoint.
+- `--ip_ckpt`: Path to the trained Anomagic checkpoint.
 - `--similarity_results`: JSON from Step 4.
 - `--normal_images_dir`: Directory of normal images to inject anomalies into.
 - `--mask_base`: Path to masks from Step 5.
@@ -131,7 +131,7 @@ The script applies quality control (e.g., MetaUAS scores) and saves results in a
 
 ## 🖼️ Anomaly Inference
 
-Our pipeline generates high-fidelity synthetic anomaly images across diverse categories, including industrial datasets (VisA, MVTecAD), medical imaging (BraTS [deVerdier et al. 2024], OCT [Kermany et al. 2018]), and web-crawled images for real-world objects. Below are example synthesized images from each category, demonstrating localized anomalies with quality masks.
+Our pipeline generates high-fidelity synthetic anomaly images across diverse categories, including industrial datasets (VisA, MVTecAD), medical imaging (BraTS [deVerdier et al. 2024], OCT [Kermany et al. 2018]), and web-crawled images for real-world objects. Below are examples of synthesized images from each category, demonstrating localized anomalies with quality masks.
 
 ### Industrial Datasets (VisA & MVTecAD)
 Synthesized anomalies on objects like PCBs and capsules, with precise defect localization.
