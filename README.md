@@ -128,7 +128,7 @@ python Anomagic_test.py \
 - `--mask_base`: Path to masks from Step 5.
 - `--output_base`: Directory for generated anomaly images, masks, and overlays.
 
-The script applies quality control (e.g., MetaUAS scores) and saves results in a structured folder (e.g., `abnormal_images/`, `masks_1/`, `mask_overlays/`).
+The script applies quality control (e.g., MetaUAS scores) and saves results in a structured folder (e.g., `abnormal_images/`, `mask_overlays/`).
 
 ## 🖼️ Anomaly Inference
 
