@@ -92,13 +92,14 @@ python Anomagic_train.py \
 After training, process the weights using the `Anomagic_weight.py` files in the `weight/` folder.
 
 ### 4. Similarity Judgment for References
-Find similar images as references using `similarity_judgment_visa.py` in the `doubao/` folder:
+Find similar images as references using `similarity_judgment.py` in the `doubao/` folder:
 ```bash
-python doubao/similarity_judgment_visa.py \
-    --input_dir /path/to/defect_images \
-    --output_json /path/to/similarity_results.json
+python doubao/similarity_judgment.py \
+    --merged_json /path/to/merged_ad_datasets.json \
+    --dataset_file /path/to/dataset_info.json \
+    --dataset_name <dataset_name>
 ```
-This generates a JSON file (`similarity_results.json`) mapping defects to similar reference images across datasets.
+This generates a JSON file (`<dataset_name>_similarity_results.json`) in the directory of the dataset file, mapping defects to similar reference objects across datasets.
 
 ### 5. Generate Masks for Defects
 Create corresponding masks for defects:
