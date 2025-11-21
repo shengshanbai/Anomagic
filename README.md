@@ -149,12 +149,6 @@ Diverse everyday items with realistic anomalies, sourced from web images.
 
 ![Web Example](static/images/zero_web.png)  
 
-For complete code examples and tunable parameters (e.g., prompts, scales, masks), refer to the provided Jupyter notebooks:
-
-* `clip_anomaly_generation_mvtec.ipynb`
-* `clip_anomaly_generation_web.ipynb`
-* `clip_anomaly_generation_medical.ipynb`
-
 ## 🛠️ Todo List
 - [ ] Colab demo.
 - [ ] HuggingFace demo.
