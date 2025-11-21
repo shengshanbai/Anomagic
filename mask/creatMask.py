@@ -142,7 +142,7 @@ def process_images(data_path, output_root, json_path):
             continue
 
         # Anomaly_mask directory
-        anomaly_mask_dir = os.path.join(data_path, c, "Data/Masks")
+        anomaly_mask_dir = os.path.join(data_path, c, "Data/Masks/Anomaly")
         if not os.path.exists(anomaly_mask_dir):
             print(f"Anomaly_mask directory does not exist: {anomaly_mask_dir}")
             continue
