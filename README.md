@@ -170,10 +170,10 @@ Big thanks to these amazing open-source works!
 If you find our work useful in your research please consider citing our paper:
 
 ```
-@article{anomagic2026,
+@article{jiang2025anomagic,
   title={Anomagic: Crossmodal Prompt-driven Zero-shot Anomaly Generation},
-  author={Yuxin Jiang, Wei Luo, Hui Zhang, Qiyu Chen, Haiming Yao, Weiming Shen, Yunkang Cao},
+  author={Jiang, Yuxin and Luo, Wei and Zhang, Hui and Chen, Qiyu and Yao, Haiming and Shen, Weiming and Cao, Yunkang},
   journal={arXiv preprint arXiv:2511.10020},
-  year={2026}
+  year={2025}
 }
 ```
