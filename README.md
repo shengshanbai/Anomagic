@@ -129,7 +129,23 @@ python mask/creatMask.py \
 ```
 Masks are saved in the specified directory for use in generation.
 
-### 6. Anomaly Generation with Anomagic_test.py
+### 6. Pretrained Model Checkpoints
+
+Download the pretrained checkpoints for the Anomagic model. These files are hosted on Hugging Face and are used to initialize the IP-Adapter and attention modules, enabling zero-shot anomaly generation. Place them directly in the `checkpoint/` directory for immediate use.
+
+| Filename | Size | Description | Download Link |
+|----------|------|-------------|---------------|
+| att.bin | 13.4 MB | Attention module weights for cross-modal prompt alignment | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/att.bin) |
+| ip_adapter_0.bin | 3.54 GB | IP-Adapter core weights for image-text fusion generation | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/ip_adapter_0.bin) |
+
+**Usage**:
+- Download the files to the project's root `checkpoint/` folder (create it if it doesn't exist).
+- These pretrained weights can be used directly for inference without further training. 
+- **Note**: These weights are compatible with the Diffusers library (v0.21+). For training, load them in `Anomagic_train.py` to fine-tune on custom datasets.
+
+Repository: [Anomagic Checkpoints](https://huggingface.co/yuxinjiang11/Anomagic_model/tree/main/checkpoint)
+
+### 7. Anomaly Generation with Anomagic_test.py
 Generate synthetic anomaly images using the trained weights and references:
 ```bash
 python Anomagic_test.py \
