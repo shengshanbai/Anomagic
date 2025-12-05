@@ -144,8 +144,8 @@ Download the pretrained checkpoints for the Anomagic model. These files are host
 
 | Filename | Size | Description | Download Link |
 |----------|------|-------------|---------------|
-| att.bin | 13.4 MB | Attention module weights for cross-modal prompt alignment | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/att.bin) |
-| ip_adapter_0.bin | 3.54 GB | IP-Adapter core weights for image-text fusion generation | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/ip_adapter_0.bin) |
+| attention_module.bin | 13.4 MB | Attention module weights for cross-modal prompt alignment | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/att.bin) |
+| anomagic.bin | 3.54 GB | IP-Adapter core weights for image-text fusion generation | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/ip_adapter_0.bin) |
 
 **Usage**:
 - Download the files to the project's root `checkpoint/` folder (create it if it doesn't exist).
@@ -158,7 +158,8 @@ Repository: [Anomagic Checkpoints](https://huggingface.co/yuxinjiang11/Anomagic_
 Generate synthetic anomaly images using the trained weights and references:
 ```bash
 python Anomagic_test.py \
-    --ip_ckpt /path/to/trained/weights/ip_adapter.bin \
+    --ip_ckpt /path/to/trained/weights/anomagic.bin \
+    --ip_ckpt_1 /path/to/trained/weights/attention_module.bin \
     --similarity_results /path/to/similarity_results.json \
     --normal_images_dir /path/to/normal_images \
     --mask_base /path/to/generated/masks \
