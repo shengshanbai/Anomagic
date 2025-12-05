@@ -24,7 +24,7 @@
 [//]: # (    </h4>)
 [//]: # (</div>)
 
-[[Hugging Face Dataset]](https://huggingface.co/datasets/yuxinjiang11/AnomVerse)  [[Project Page]](https://yuxin-jiang.github.io/Anomagic) [[Paper]](https://arxiv.org/abs/2501.12345) [[HuggingFace Demo]](https://huggingface.co/spaces/yuxinjiang11/Anomagic)
+[[Hugging Face Dataset]](https://huggingface.co/datasets/yuxinjiang11/AnomVerse) [[Project Page]](https://yuxin-jiang.github.io/Anomagic) [[HuggingFace Demo]](https://huggingface.co/spaces/yuxinjiang11/Anomagic) [[Paper]](https://arxiv.org/abs/2511.10020) 
 
 ![Framework](static/images/method.png)
 
