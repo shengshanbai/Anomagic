@@ -45,7 +45,8 @@ Try the live demo on Hugging Face Spaces:
 
 [![Hugging Face Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/yuxinjiang11/Anomagic)  
 ![Demo Preview](static/images/demo.png)  
-*Click the badge or image to open the interactive interface on Hugging Face.*
+
+**Note**: Click the badge or image to open the interactive interface on Hugging Face.
 
 ## 🏭 Industrial Visual Anomaly Detection Datasets (AnomVerse)
 
@@ -149,8 +150,6 @@ Download the pretrained checkpoints for the Anomagic model. These files are host
 **Usage**:
 - Download the files to the project's root `checkpoint/` folder (create it if it doesn't exist).
 - These pretrained weights can be used directly for inference without further training.
-  
-**Note**:
 - These weights are compatible with the Diffusers library (v0.21+). For training, load them in `Anomagic_train.py` to fine-tune on custom datasets.
 
 Repository: [Anomagic Checkpoints](https://huggingface.co/yuxinjiang11/Anomagic_model/tree/main/checkpoint)
