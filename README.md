@@ -144,8 +144,8 @@ Download the pretrained checkpoints for the Anomagic model. These files are host
 
 | Filename | Size | Description | Download Link |
 |----------|------|-------------|---------------|
-| attention_module.bin | 13.4 MB | Attention module weights for cross-modal prompt alignment | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/att.bin) |
-| anomagic.bin | 3.54 GB | IP-Adapter core weights for image-text fusion generation | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/ip_adapter_0.bin) |
+| attention_module.bin | 13.4 MB | Attention module weights for cross-modal prompt alignment | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/attention_module.bin) |
+| anomagic.bin | 3.54 GB | Anomagic core weights for image-text fusion generation | [Hugging Face](https://huggingface.co/yuxinjiang11/Anomagic_model/resolve/main/checkpoint/anomagic.bin) |
 
 **Usage**:
 - Download the files to the project's root `checkpoint/` folder (create it if it doesn't exist).
