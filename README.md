@@ -48,7 +48,7 @@ Try the live demo on Hugging Face Spaces:
 
 **Note**: Click the badge or image to open the interactive interface on Hugging Face.
 
-### 🎮 Generation Method Demos
+### 🎮 Anomaly Generation Methods
 Provides a hierarchical taxonomy of key papers on anomaly generation methods, surpassing flat lists with fine-grained subcategories that delineate emerging hotspots.  
   [GitHub Repository](https://github.com/yuxin-jiang/Awesome-Anomaly-Generation)
   
