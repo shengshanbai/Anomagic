@@ -121,7 +121,20 @@ python Anomagic_train.py \
 
 After training, process the weights using the `Anomagic_weight.py` files in the `weight/` folder.
 
-### 4. Similarity Judgment for References
+### 4. Training/Finetuning Inpainting Model with Anomagic_finetune_Inpaint.py
+If you want to train or finetune the inpainting model, use the `Anomagic_finetune_Inpaint.py` script instead. This script supports three finetune modes via the `--finetune_mode` parameter:
+```bash
+python Anomagic_finetune_Inpaint.py \
+    --data_json_file /path/to/your/dataset.json \
+    --output_dir /path/to/output/weights \
+    --finetune_mode [lora_only/feature_extraction/full]
+```
+- `--finetune_mode`: Core parameter for finetuning strategy, with three optional values:
+  - `lora_only`: Only finetune the LoRA (Low-Rank Adaptation) parameters. This mode has low resource consumption and is suitable for lightweight finetuning on limited GPU memory.
+  - `feature_extraction`: Freeze LoRA parameters and only train the feature extraction part of the model. This mode fixes the adapter layer and focuses on optimizing the base feature extraction network.
+  - `full`: Finetune all parameters of the model (both LoRA and base model). This mode requires the most computing resources but can achieve the best adaptation effect for the target dataset.
+
+### 5. Similarity Judgment for References
 Find similar images as references using `similarity_judgment.py` in the `doubao/` folder:
 ```bash
 python doubao/similarity_judgment.py \
@@ -131,7 +144,7 @@ python doubao/similarity_judgment.py \
 ```
 This generates a JSON file (`<dataset_name>_similarity_results.json`) in the directory of the dataset file, mapping defects to similar reference objects across datasets.
 
-### 5. Generate Masks for Defects
+### 6. Generate Masks for Defects
 Create corresponding masks for defects:
 - Apply `mvtec.json` or `visa.json`.
 - Run `creatMask.py`:
@@ -142,7 +155,7 @@ python mask/creatMask.py \
 ```
 Masks are saved in the specified directory for use in generation.
 
-### 6. Pretrained Model Checkpoints
+### 7. Pretrained Model Checkpoints
 
 Download the pretrained checkpoints for the Anomagic model. These files are hosted on Hugging Face and are used to initialize the IP-Adapter and attention modules, enabling zero-shot anomaly generation. Place them directly in the `checkpoint/` directory for immediate use.
 
@@ -158,7 +171,7 @@ Download the pretrained checkpoints for the Anomagic model. These files are host
 
 Repository: [Anomagic Checkpoints](https://huggingface.co/yuxinjiang11/Anomagic_model/tree/main/checkpoint)
 
-### 7. Anomaly Generation with Anomagic_test.py
+### 8. Anomaly Generation with Anomagic_test.py
 Generate synthetic anomaly images using the trained weights and references:
 ```bash
 python Anomagic_test.py \
