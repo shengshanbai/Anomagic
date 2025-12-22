@@ -1,5 +1,4 @@
 import os
-
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 import torch.nn as nn
@@ -34,7 +33,6 @@ class MyDataset(torch.utils.data.Dataset):
     def __init__(self, json_file, datasets_root, tokenizer, size=512, t_drop_rate=0.05, i_drop_rate=0.05, ti_drop_rate=0.05,
                  use_analysis_text=True, use_short_text=True):
         super().__init__()
-
         self.tokenizer = tokenizer
         self.size = size
         self.i_drop_rate = i_drop_rate
@@ -43,17 +41,14 @@ class MyDataset(torch.utils.data.Dataset):
         self.use_analysis_text = use_analysis_text
         self.use_short_text = use_short_text
         self.datasets_root = datasets_root
-
         # Load and flatten the dataset structure
         with open(json_file) as f:
             data = json.load(f)
-
         # Extract all images from all datasets
         self.data = []
         for dataset in data["datasets"]:
             for image_info in dataset["images"]:
                 self.data.append(image_info)
-
         self.transform = transforms.Compose([
             transforms.Resize(self.size, interpolation=transforms.InterpolationMode.BILINEAR),
             transforms.CenterCrop(self.size),
@@ -68,7 +63,6 @@ class MyDataset(torch.utils.data.Dataset):
         while retries < max_retries:
             try:
                 item = self.data[idx]
-
                 text = None
                 if self.use_analysis_text and item.get("analysis_files"):
                     analysis_path = os.path.join(self.datasets_root, item["analysis_files"])
@@ -78,7 +72,6 @@ class MyDataset(torch.utils.data.Dataset):
                         raise PermissionError(f"No permission to read analysis text file: {analysis_path}")
                     with open(analysis_path, "r") as f:
                         text = f.read().strip()
-
                 if text is None and self.use_short_text and item.get("analysis_files_short"):
                     short_path = os.path.join(self.datasets_root, item["analysis_files_short"])
                     if not os.path.exists(short_path):
@@ -87,34 +80,26 @@ class MyDataset(torch.utils.data.Dataset):
                         raise PermissionError(f"No permission to read short text file: {short_path}")
                     with open(short_path, "r") as f:
                         text = f.read().strip()
-
                 if text is None:
                     text = f"A high-quality image showing {item.get('defect_name', 'unknown')} defect on {item.get('category', 'unknown')}"
-
                 image_path = os.path.join(self.datasets_root, item["image_path"])
                 mask_path = os.path.join(self.datasets_root, item["mask_path"])
-
                 if not os.path.exists(image_path):
                     raise FileNotFoundError(f"Image file does not exist: {image_path}")
                 if not os.path.exists(mask_path):
                     raise FileNotFoundError(f"Mask file does not exist: {mask_path}")
-
                 with Image.open(image_path) as img:
                     img.verify()
                     raw_image = Image.open(image_path)
-
                 with Image.open(mask_path) as msk:
                     msk.verify()
                     mask = Image.open(mask_path)
-
                 mask = mask.resize((64, 64))
                 mask = mask.convert('L')
                 mask = torch.tensor(np.array(mask), dtype=torch.float32)
                 mask = (mask > 0.5).float()
-
                 image = self.transform(raw_image.convert("RGB"))
                 clip_image = self.clip_image_processor(images=raw_image, return_tensors="pt").pixel_values
-
                 drop_image_embed = 0
                 rand_num = random.random()
                 if rand_num < self.i_drop_rate:
@@ -124,7 +109,6 @@ class MyDataset(torch.utils.data.Dataset):
                 elif rand_num < (self.i_drop_rate + self.t_drop_rate + self.ti_drop_rate):
                     text = ""
                     drop_image_embed = 1
-
                 text_input_ids = self.tokenizer(
                     text,
                     max_length=self.tokenizer.model_max_length,
@@ -132,7 +116,6 @@ class MyDataset(torch.utils.data.Dataset):
                     truncation=True,
                     return_tensors="pt"
                 ).input_ids
-
                 return {
                     "image": image,
                     "mask": mask,
@@ -140,7 +123,6 @@ class MyDataset(torch.utils.data.Dataset):
                     "clip_image": clip_image,
                     "drop_image_embed": drop_image_embed,
                 }
-
             except (Image.UnidentifiedImageError, FileNotFoundError, OSError, PermissionError) as e:
                 print(f"Sample {idx} loading failed: {str(e)}, skipping this sample")
                 retries += 1
@@ -149,7 +131,6 @@ class MyDataset(torch.utils.data.Dataset):
                 print(f"Sample {idx} encountered unknown error: {str(e)}, skipping this sample")
                 retries += 1
                 idx = (idx + 1) % len(self.data)
-
         raise RuntimeError(f"Failed to load {max_retries} samples after attempts, please check dataset integrity")
 
     def __len__(self):
@@ -162,7 +143,6 @@ def collate_fn(data):
     text_input_ids = torch.cat([example["text_input_ids"] for example in data], dim=0)
     clip_images = torch.cat([example["clip_image"] for example in data], dim=0)
     drop_image_embeds = [example["drop_image_embed"] for example in data]
-
     return {
         "images": images,
         "masks": masks,
@@ -189,19 +169,15 @@ class SelfAttention(nn.Module):
         width = height
         x = x.view(batch_size, channels, width, height)
         batch_size, channels, height, width = x.size()
-
         q = self.query(x).view(batch_size, -1, height * width).permute(0, 2, 1)
         k = self.key(x).view(batch_size, -1, height * width)
         v = self.value(x).view(batch_size, -1, height * width)
-
         attention_scores = torch.bmm(q, k)
-
         if mask is not None:
             mask = nn.functional.interpolate(mask, size=(height, width), mode='nearest')
             mask = mask.view(batch_size, 1, height * width)
             large_constant = 1e6
             attention_scores = attention_scores - (1 - mask) * large_constant
-
         attention_weights = self.softmax(attention_scores)
         out = torch.bmm(v, attention_weights.permute(0, 2, 1))
         out = out.view(batch_size, channels, height, width)
@@ -209,7 +185,6 @@ class SelfAttention(nn.Module):
         out = out.view(batch_size, channels, height * width)
         out = out.permute(0, 2, 1)
         out = self.proj_out(out)
-
         return out
 
 
@@ -219,7 +194,6 @@ class Anomagic(torch.nn.Module):
         self.unet = unet
         self.image_proj_model = image_proj_model
         self.adapter_modules = adapter_modules
-
         if ckpt_path is not None:
             self.load_from_checkpoint(ckpt_path)
 
@@ -232,26 +206,14 @@ class Anomagic(torch.nn.Module):
     def load_from_checkpoint(self, ckpt_path: str):
         orig_proj_sum = torch.sum(torch.stack([torch.sum(p) for p in self.image_proj_model.parameters()]))
         orig_adapter_sum = torch.sum(torch.stack([torch.sum(p) for p in self.adapter_modules.parameters()]))
-
         state_dict = torch.load(ckpt_path, map_location="cpu")
         self.image_proj_model.load_state_dict(state_dict["image_proj"], strict=True)
         self.adapter_modules.load_state_dict(state_dict["ip_adapter"], strict=True)
-
         new_proj_sum = torch.sum(torch.stack([torch.sum(p) for p in self.image_proj_model.parameters()]))
         new_adapter_sum = torch.sum(torch.stack([torch.sum(p) for p in self.adapter_modules.parameters()]))
-
         assert orig_proj_sum != new_proj_sum, "Weights of image_proj_model did not change!"
         assert orig_adapter_sum != new_adapter_sum, "Weights of adapter_modules did not change!"
-
         print(f"Successfully loaded weights from checkpoint {ckpt_path}")
-
-    def save_checkpoint(self, save_path):
-        state_dict = {
-            "image_proj": self.image_proj_model.state_dict(),
-            "adapter_modules": {k: v.clone() for k, v in self.adapter_modules.state_dict().items()}
-        }
-        torch.save(state_dict, save_path)
-        print(f"Saved checkpoint to {save_path}")
 
 
 def parse_args():
@@ -335,52 +297,43 @@ def parse_args():
         help='The integration to report the results and logs to.',
     )
     parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
-
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
     if env_local_rank != -1 and env_local_rank != args.local_rank:
         args.local_rank = env_local_rank
-
     return args
 
 
 def load_lora_model(unet, device, diffusion_model_learning_rate):
     for param in unet.parameters():
         param.requires_grad_(False)
-
     unet_lora_config = LoraConfig(
         r=16,
         lora_alpha=16,
         init_lora_weights="gaussian",
         target_modules=["to_k", "to_q", "to_v", "to_out.0"],
     )
-
     unet.add_adapter(unet_lora_config)
     lora_layers = filter(lambda p: p.requires_grad, unet.parameters())
-
     return unet, lora_layers
 
 
 def encode_long_text(input_ids, tokenizer, text_encoder, max_length=77, device="cuda"):
     if input_ids.dim() == 1:
         input_ids = input_ids.unsqueeze(0)
-
     batch_size = input_ids.size(0)
     hidden_dim = text_encoder.config.hidden_size
     combined_embeddings = torch.zeros(batch_size, hidden_dim, device=device)
-
     for batch_idx in range(batch_size):
         current_input_ids = input_ids[batch_idx]
         chunks = [
             current_input_ids[i:i + max_length]
             for i in range(0, len(current_input_ids), max_length)
         ]
-
         embeddings = []
         for chunk in chunks:
             chunk_len = len(chunk)
             padding_len = max_length - chunk_len
-
             chunk_input = {
                 "input_ids": torch.cat([
                     chunk.unsqueeze(0).to(device),
@@ -391,25 +344,21 @@ def encode_long_text(input_ids, tokenizer, text_encoder, max_length=77, device="
                     torch.zeros(1, padding_len, dtype=torch.long, device=device)
                 ], dim=1)
             }
-
             with torch.no_grad():
                 chunk_emb = text_encoder(**chunk_input).last_hidden_state
                 embeddings.append(chunk_emb[:, :chunk_len, :].mean(dim=1))
-
         if embeddings:
             combined_embeddings[batch_idx] = torch.mean(torch.cat(embeddings, dim=0), dim=0)
         else:
             combined_embeddings[batch_idx] = torch.zeros(hidden_dim, device=device)
-
     return combined_embeddings.unsqueeze(1)
 
 
 def main():
     args = parse_args()
-
     # Initialize distributed training
     accelerator = Accelerator(
-        gradient_accumulation_steps=1,  # Explicitly disable gradient accumulation
+        gradient_accumulation_steps=1, # Explicitly disable gradient accumulation
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
         project_dir=args.output_dir,
@@ -421,11 +370,9 @@ def main():
     # Set random seed for reproducibility
     if args.seed is not None:
         set_seed(args.seed)
-
     # Create output directory
     if accelerator.is_main_process:
         os.makedirs(args.output_dir, exist_ok=True)
-
     # Load model components
     noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(args.pretrained_model_name_or_path, subfolder="tokenizer")
@@ -433,19 +380,16 @@ def main():
     vae = AutoencoderKL.from_pretrained(args.pretrained_model_name_or_path, subfolder="vae")
     unet = UNet2DConditionModel.from_pretrained(args.pretrained_model_name_or_path, subfolder="unet")
     image_encoder = CLIPVisionModelWithProjection.from_pretrained(args.image_encoder_path)
-
     # Freeze unnecessary parameters
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
     image_encoder.requires_grad_(False)
-
     # Initialize Anomagic projection model
     image_proj_model = ImageProjModel(
         cross_attention_dim=unet.config.cross_attention_dim,
         clip_embeddings_dim=image_encoder.config.projection_dim,
         clip_extra_context_tokens=4,
     )
-
     # Initialize attention processors
     attn_procs = {}
     unet_sd = unet.state_dict()
@@ -470,29 +414,24 @@ def main():
             attn_procs[name] = IPAttnProcessor(hidden_size=hidden_size, cross_attention_dim=cross_attention_dim)
             attn_procs[name].load_state_dict(weights)
     unet.set_attn_processor(attn_procs)
-
     # Add LoRA adapter
     unet, lora_layers = load_lora_model(unet, accelerator.device, 4e-4)
     adapter_modules = torch.nn.ModuleList(unet.attn_processors.values())
-
     # Initialize Anomagic model
     anomagic_model = Anomagic(unet, image_proj_model, adapter_modules, args.pretrained_ip_adapter_path)
     attention_module = SelfAttention(1280)
-
     # Set mixed precision
     weight_dtype = torch.float32
     if accelerator.mixed_precision == "fp16":
         weight_dtype = torch.float16
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
-
     # Move models to device
     unet.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
     text_encoder.to(accelerator.device, dtype=weight_dtype)
     image_encoder.to(accelerator.device, dtype=weight_dtype)
     attention_module.to(accelerator.device, dtype=weight_dtype)
-
     # Initialize optimizer
     params_to_opt = itertools.chain(
         anomagic_model.image_proj_model.parameters(),
@@ -501,7 +440,6 @@ def main():
         attention_module.parameters()
     )
     optimizer = torch.optim.AdamW(params_to_opt, lr=args.learning_rate, weight_decay=args.weight_decay)
-
     # Prepare dataset
     train_dataset = MyDataset(
         args.data_json_file,
@@ -520,45 +458,36 @@ def main():
         pin_memory=True,
         persistent_workers=True if args.dataloader_num_workers > 0 else False
     )
-
     # Prepare all components for distributed training
     anomagic_model, attention_module, optimizer, train_dataloader = accelerator.prepare(
         anomagic_model, attention_module, optimizer, train_dataloader
     )
-
     # Training loop
     global_step = 0
     for epoch in range(args.num_train_epochs):
         begin = time.perf_counter()
         anomagic_model.train()
         attention_module.train()
-
         for step, batch in enumerate(train_dataloader):
-
             load_data_time = time.perf_counter() - begin
             with accelerator.accumulate(anomagic_model):
                 # Encode images to latent space
                 with torch.no_grad():
                     latents = vae.encode(batch["images"].to(weight_dtype)).latent_dist.sample()
                     latents = latents * vae.config.scaling_factor
-
                 # Sample noise
                 noise = torch.randn_like(latents)
                 bsz = latents.shape[0]
-
                 # Sample random timesteps
                 timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
                 timesteps = timesteps.long()
-
                 # Add noise
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
-
                 with torch.no_grad():
                     # Get image embeddings
                     outputs = image_encoder(batch["clip_images"].to(weight_dtype))
                     image_embeds = outputs.image_embeds
                     last_feature_layer_output = outputs.last_hidden_state
-
                     # Process dropout
                     image_embeds_ = []
                     for image_embed, drop_image_embed in zip(image_embeds, batch["drop_image_embeds"]):
@@ -566,7 +495,6 @@ def main():
                             image_embeds_.append(torch.zeros_like(image_embed))
                         else:
                             image_embeds_.append(image_embed)
-
                     # Encode text
                     encoder_hidden_states = encode_long_text(
                         batch["text_input_ids"],
@@ -574,17 +502,13 @@ def main():
                         text_encoder,
                         device=accelerator.device
                     )
-
                 # Process image features through attention module
                 image_embeds = attention_module(last_feature_layer_output[:, :256, :], batch["masks"].unsqueeze(1))
-
                 # Forward pass
                 noise_pred = anomagic_model(noisy_latents, timesteps, encoder_hidden_states, image_embeds)
-
                 # Compute loss
                 loss = (F.mse_loss(noise_pred.float(), noise.float(), reduction="none") * batch["masks"].unsqueeze(
                     1)).mean([1, 2, 3]).mean()
-
                 # Backward pass
                 accelerator.backward(loss)
                 optimizer.step()
@@ -600,7 +524,6 @@ def main():
                         print(
                             f"Epoch {epoch}, Step {global_step}, Loss: {loss.detach().item()}"
                         )
-
             # Save checkpoint
             print(f"global_step {global_step}")
             if accelerator.is_main_process and global_step % args.save_steps == 0:
@@ -610,16 +533,21 @@ def main():
                 print(f"Checkpoint dir: {checkpoint_dir}")
                 anomagic_save_path = os.path.join(checkpoint_dir, f"anomagic-{global_step}.bin")
                 attention_module_save_path = os.path.join(checkpoint_dir, f"attention_module-{global_step}.bin")
-                anomagic_model.save_checkpoint(anomagic_save_path)
+
+                # 统一保存完整 state_dict
+                torch.save(anomagic_model.state_dict(), anomagic_save_path)
                 torch.save(attention_module.state_dict(), attention_module_save_path)
+
             begin = time.perf_counter()
 
+    # 训练结束后的最终保存（同样使用完整 state_dict）
     if accelerator.is_main_process:
         checkpoint_dir = os.path.join(args.output_dir, f"checkpoint-{global_step}")
         os.makedirs(checkpoint_dir, exist_ok=True)
         anomagic_save_path = os.path.join(checkpoint_dir, f"anomagic-{global_step}.bin")
         attention_module_save_path = os.path.join(checkpoint_dir, f"attention_module-{global_step}.bin")
-        anomagic_model.save_checkpoint(anomagic_save_path)
+
+        torch.save(anomagic_model.state_dict(), anomagic_save_path)
         torch.save(attention_module.state_dict(), attention_module_save_path)
 
 
