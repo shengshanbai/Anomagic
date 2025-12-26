@@ -180,15 +180,17 @@ python Anomagic_test.py \
     --ip_ckpt /path/to/trained/weights/anomagic.bin \
     --ip_ckpt_1 /path/to/trained/weights/attention_module.bin \
     --similarity_results /path/to/similarity_results.json \
-    --normal_images_dir /path/to/normal_images \
+    --dataset_base /path/to/normal_images \
     --mask_base /path/to/generated/masks \
-    --output_base /path/to/generated/anomalies
+    --output_base /path/to/generated/anomalies \
+    --quality_model_path  /path/to/MetaUAS quality assessment model
 ```
 - `--ip_ckpt`: Path to the trained Anomagic checkpoint.
-- `--similarity_results`: JSON from Step 4.
-- `--normal_images_dir`: Directory of normal images to inject anomalies into.
-- `--mask_base`: Path to masks from Step 5.
+- `--similarity_results`: JSON from Step 5.
+- `--dataset_base`: Directory of normal images to inject anomalies into.
+- `--mask_base`: Path to masks from Step 6.
 - `--output_base`: Directory for generated anomaly images, masks, and overlays.
+- `--quality_model_path` Path for MetaUAS quality assessment model. Checkpoints]((https://huggingface.co/csgaobb/MetaUAS))
 
 The script applies quality control (e.g., MetaUAS scores) and saves results in a structured folder (e.g., `abnormal_images/`, `mask_overlays/`).
 
