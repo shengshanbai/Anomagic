@@ -12,7 +12,19 @@
             "listen": {
                 "host": "0.0.0.0", // VSCode监听的地址
                 "port": 5678       // VSCode监听的端口
-            }
+            },
+            "pathMappings": [
+                {
+                "localRoot": "${workspaceFolder}",
+                "remoteRoot": "/tmp/code/Anomagic"
+                }
+            ],
+        },
+        {
+            "name": "infer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/infer.py",
         }
     ]
 }
