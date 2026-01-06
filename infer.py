@@ -182,12 +182,14 @@ def get_bounding_rect(mask: Image.Image, padding: int = 0):
     return (x_min, y_min, x_max, y_max)
 
 def crop_image(img:Image.Image,mask:Image.Image,crop_size):
-    (x_min, y_min, x_max, y_max)= get_bounding_rect(mask)
+    (x_min, y_min, x_max, y_max)= get_bounding_rect(mask,50)
     rect_w=x_max - x_min
     rect_h=y_max - y_min
     rect_cx=(x_min+x_max)/2
     rect_cy=(y_min+y_max)/2
     max_side=max(rect_w,rect_h)
+    if max_side<crop_size:
+        max_side=crop_size
     crop_rect=(rect_cx-max_side/2,rect_cy-max_side/2,rect_cx+max_side/2,rect_cy+max_side/2)
     crop_rect=(int(crop_rect[0]),int(crop_rect[1]),int(crop_rect[2]),int(crop_rect[3]))
     crop_image=img.crop(crop_rect)

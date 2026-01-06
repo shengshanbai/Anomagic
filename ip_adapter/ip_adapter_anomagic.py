@@ -275,7 +275,7 @@ class Anomagic:
         # 生成image_prompt_embeds
         image_prompt_embeds = self.image_proj_model(image_embeds)
         uncond_image_prompt_embeds = self.image_proj_model(torch.zeros_like(image_embeds))
-        return image_prompt_embeds, uncond_image_prompt_embeds
+        return image_prompt_embeds.to(self.dtype), uncond_image_prompt_embeds.to(self.dtype)
     def set_scale(self, scale):
         for attn_processor in self.pipe.unet.attn_processors.values():
             if isinstance(attn_processor, IPAttnProcessor):
