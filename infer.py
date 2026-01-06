@@ -83,7 +83,7 @@ class SingleAnomalyGenerator:
         if HAS_ANOMAGIC:
             print("Initializing Anomagic model...")
             self.anomagic_model = Anomagic(self.pipe, self.clip_vision_model, self.ip_ckpt_path, self.att_ckpt_path,
-                                           self.device)
+                                           self.device,dtype=self.dtype)
         else:
             print("No Anomagic, using basic Pipe.")
 
