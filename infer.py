@@ -77,8 +77,8 @@ class SingleAnomalyGenerator:
 
         # Load weights (download from cloud repo to memory, avoid any disk usage)
         print("Loading weights into memory...")
-        self.ip_ckpt_path="checkpoint/anomagic.bin"
-        self.att_ckpt_path="checkpoint/attention_module.bin"
+        self.ip_ckpt_path="checkpoints/anomagic.bin"
+        self.att_ckpt_path="checkpoints/attention_module.bin"
         # If Anomagic is available, load weights into the model
         if HAS_ANOMAGIC:
             print("Initializing Anomagic model...")
