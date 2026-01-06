@@ -8,7 +8,7 @@ from pathlib import Path
 try:
     from ip_adapter.ip_adapter_anomagic import Anomagic
     HAS_ANOMAGIC = True
-except ImportError:
+except ImportError as e:
     HAS_ANOMAGIC = False
     print("Anomagic not imported, will use basic Inpainting")
     
