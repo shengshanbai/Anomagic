@@ -152,15 +152,16 @@ def generate_anomaly(config_path):
     generator.load_models()
     with open(config_path,"rb") as f:
         config=orjson.loads(f.read())
-    output_dir=Path(config_path).parent.joinpath("merge")
+    config_dir=Path(config_path).parent
+    output_dir=config_dir.joinpath("merge")
     output_dir.mkdir(exist_ok=True,parents=True)
     prompt=config["prompt"]
     task_id=0
     for task in config["tasks"]:
-        normal_img=Image.open(task["normal_img"]).convert("RGB")
-        reference_img=Image.open(task["reference_img"]).convert("RGB")
-        normal_mask_img=Image.open(task["normal_mask_img"]).convert("L")
-        reference_mask_img=Image.open(task["reference_mask_img"]).convert("L")
+        normal_img=Image.open(config_dir.joinpath(task["normal_img"])).convert("RGB")
+        reference_img=Image.open(config_dir.joinpath(task["reference_img"])).convert("RGB")
+        normal_mask_img=Image.open(config_dir.joinpath(task["normal_mask_img"])).convert("L")
+        reference_mask_img=Image.open(config_dir.joinpath(task["reference_mask_img"])).convert("L")
         generated_image=generator.generate_single_image(normal_img,
                                         reference_img,
                                         normal_mask_img,
