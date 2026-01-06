@@ -137,8 +137,8 @@ class Anomagic:
         # 4. 初始化image_proj模型（统一dtype）
         self.image_proj_model = self.init_proj()
         # 5. 从URL加载权重到内存（核心修正）
-        self.ip_state_dict = self.load_weight_from_url(ip_ckpt_url)
-        self.att_state_dict = self.load_weight_from_url(att_ckpt_url)
+        self.ip_state_dict =torch.load(ip_ckpt_url, map_location="cpu")#self.load_weight_from_url(ip_ckpt_url)
+        self.att_state_dict =torch.load(att_ckpt_url, map_location="cpu")# self.load_weight_from_url(att_ckpt_url)
         # 6. 加载权重到模型
         self.load_anomagic()
     def load_weight_from_url(self, url):
