@@ -19,6 +19,7 @@
                 "remoteRoot": "/tmp/code/Anomagic"
                 }
             ],
+            "justMyCode": false
         },
         {
             "name": "infer",

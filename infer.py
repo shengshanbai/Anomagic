@@ -17,7 +17,7 @@ class SingleAnomalyGenerator:
         # Auto-detect GPU and set dtype
         if torch.cuda.is_available() and "cuda" in device:
             self.device = torch.device(device)
-            self.dtype = torch.float32
+            self.dtype = torch.float16
             print(f"Using GPU: {device}, dtype: {self.dtype}")
         else:
             self.device = torch.device("cpu")
