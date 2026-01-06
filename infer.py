@@ -95,7 +95,7 @@ class SingleAnomalyGenerator:
         if normal_image is None or reference_image is None:
             raise ValueError("Normal or reference image is None. Please upload valid images.")
 
-        target_size = (2048, 2048)
+        target_size = (512, 512)
         normal_image = normal_image.resize(target_size)
         reference_image = reference_image.resize(target_size)
         
@@ -144,6 +144,56 @@ class SingleAnomalyGenerator:
 
         return generated_image
 
+def get_bounding_rect(mask: Image.Image, padding: int = 0):
+    """
+    获取包围mask的最小外接矩形区域
+    
+    Args:
+        mask: PIL Image (L模式，二值图像)
+        padding: 矩形边界的扩展像素数
+    
+    Returns:
+        tuple: (x, y, width, height) 矩形坐标和尺寸
+        None: 如果mask为空
+    """
+    # 转换为numpy数组
+    mask_array = np.array(mask)
+    
+    # 确保是二值图像
+    if mask_array.max() > 1:
+        mask_array = (mask_array > 0).astype(np.uint8)
+    
+    # 找到非零像素的坐标
+    coords = np.column_stack(np.where(mask_array > 0))
+    
+    if len(coords) == 0:
+        return None  # mask为空
+    
+    # 计算边界框
+    y_min, x_min = coords.min(axis=0)
+    y_max, x_max = coords.max(axis=0)
+    
+    # 添加padding
+    x_min = max(0, x_min - padding)
+    y_min = max(0, y_min - padding)
+    x_max = min(mask_array.shape[1] - 1, x_max + padding)
+    y_max = min(mask_array.shape[0] - 1, y_max + padding)
+    
+    return (x_min, y_min, x_max, y_max)
+
+def crop_image(img:Image.Image,mask:Image.Image,crop_size):
+    (x_min, y_min, x_max, y_max)= get_bounding_rect(mask)
+    rect_w=x_max - x_min
+    rect_h=y_max - y_min
+    rect_cx=(x_min+x_max)/2
+    rect_cy=(y_min+y_max)/2
+    max_side=max(rect_w,rect_h)
+    crop_rect=(rect_cx-max_side/2,rect_cy-max_side/2,rect_cx+max_side/2,rect_cy+max_side/2)
+    crop_rect=(int(crop_rect[0]),int(crop_rect[1]),int(crop_rect[2]),int(crop_rect[3]))
+    crop_image=img.crop(crop_rect)
+    if max_side>crop_size:
+        crop_image=crop_image.resize((crop_size,crop_size))
+    return crop_rect,crop_image
 
 @click.command()
 @click.option("--config_path", type=str, help="Normal image path",default="/tmp/code/screw_pictures/loc1/merge.json")
@@ -157,19 +207,26 @@ def generate_anomaly(config_path):
     output_dir.mkdir(exist_ok=True,parents=True)
     prompt=config["prompt"]
     task_id=0
+    crop_size=512
     for task in config["tasks"]:
         normal_img=Image.open(config_dir.joinpath(task["normal_img"])).convert("RGB")
         reference_img=Image.open(config_dir.joinpath(task["reference_img"])).convert("RGB")
         normal_mask_img=Image.open(config_dir.joinpath(task["normal_mask_img"])).convert("L")
         reference_mask_img=Image.open(config_dir.joinpath(task["reference_mask_img"])).convert("L")
-        generated_image=generator.generate_single_image(normal_img,
-                                        reference_img,
-                                        normal_mask_img,
-                                        reference_mask_img,
+        crop_normal_rect,crop_normal_img=crop_image(normal_img,normal_mask_img,crop_size=crop_size)
+        _,crop_normal_mask_img=crop_image(normal_mask_img,normal_mask_img,crop_size=crop_size)
+        crop_reference_rect,crop_reference_img=crop_image(reference_img,reference_mask_img,crop_size=crop_size)
+        _,crop_reference_mask_img=crop_image(reference_mask_img,reference_mask_img,crop_size=crop_size)
+        generated_image=generator.generate_single_image(crop_normal_img,
+                                        crop_reference_img,
+                                        crop_normal_mask_img,
+                                        crop_reference_mask_img,
                                         prompt,
                                         num_inference_steps=task["steps"],
                                         ip_scale=task["ip_scale"],
                                         strength=task["strength"])
+        generated_image=generated_image.resize((crop_normal_rect[2]-crop_normal_rect[0],crop_normal_rect[3]-crop_normal_rect[1]))
+        normal_img.paste(generated_image,crop_normal_rect)
         generated_image.save(output_dir.joinpath(f"task-{task_id}.jpg"))
 
 if __name__ == "__main__":

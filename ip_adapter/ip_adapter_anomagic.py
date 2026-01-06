@@ -133,7 +133,7 @@ class Anomagic:
             "yuxinjiang11/image_encoder", # 完整仓库路径
             torch_dtype=self.dtype,
         ).to(self.device, dtype=self.dtype)
-        self.clip_image_processor = CLIPImageProcessor(crop_size=2048)
+        self.clip_image_processor = CLIPImageProcessor()
         # 4. 初始化image_proj模型（统一dtype）
         self.image_proj_model = self.init_proj()
         # 5. 从URL加载权重到内存（核心修正）
