@@ -66,12 +66,12 @@ class SingleAnomalyGenerator:
         self.pipe.scheduler = DPMSolverMultistepScheduler.from_config(self.pipe.scheduler.config)
 
         print("Loading CLIP image encoder...")
-        #from transformers import CLIPVisionModel, CLIPImageProcessor
-        # self.clip_vision_model = CLIPVisionModel.from_pretrained(
-        #     "openai/clip-vit-large-patch14",
-        #     torch_dtype=self.dtype
-        # ).to(self.device)
-        # self.clip_image_processor = CLIPImageProcessor.from_pretrained("openai/clip-vit-large-patch14")
+        from transformers import CLIPVisionModel, CLIPImageProcessor
+        self.clip_vision_model = CLIPVisionModel.from_pretrained(
+            "openai/clip-vit-large-patch14",
+            torch_dtype=self.dtype
+        ).to(self.device)
+        self.clip_image_processor = CLIPImageProcessor.from_pretrained("openai/clip-vit-large-patch14")
 
         print("All models loaded!")
 
@@ -82,7 +82,7 @@ class SingleAnomalyGenerator:
         # If Anomagic is available, load weights into the model
         if HAS_ANOMAGIC:
             print("Initializing Anomagic model...")
-            self.anomagic_model = Anomagic(self.pipe, "openai/clip-vit-large-patch14", self.ip_ckpt_path, self.att_ckpt_path,
+            self.anomagic_model = Anomagic(self.pipe, self.clip_vision_model, self.ip_ckpt_path, self.att_ckpt_path,
                                            self.device)
         else:
             print("No Anomagic, using basic Pipe.")
