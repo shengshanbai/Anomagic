@@ -158,7 +158,7 @@ class Anomagic:
             cross_attention_dim=self.pipe.unet.config.cross_attention_dim,
             clip_embeddings_dim=self.image_encoder.config.projection_dim,
             clip_extra_context_tokens=self.num_tokens,
-        ).to(self.device, dtype=self.dtype)
+        ).to(self.device, dtype=torch.float32)
         return image_proj_model
     def set_anomagic(self):
         """配置UNet的Attention处理器和LoRA"""
