@@ -102,14 +102,14 @@ class SingleAnomalyGenerator:
         if mask is not None and isinstance(mask, Image.Image):
             mask = mask.resize(target_size)
             mask = mask.convert('L')
-            mask = np.array(mask) > 0
+            mask = np.array(mask) > 100
             mask = Image.fromarray(mask.astype(np.uint8) * 255).convert('L')
 
         # Process reference image mask (mask_0)
         if mask_0 is not None and isinstance(mask_0, Image.Image):
             mask_0 = mask_0.resize(target_size)
             mask_0 = mask_0.convert('L')
-            mask_0 = np.array(mask_0) > 0
+            mask_0 = np.array(mask_0) > 100
             mask_0 = Image.fromarray(mask_0.astype(np.uint8) * 255).convert('L')
 
         # If Anomagic is available, use it to generate; otherwise basic Inpainting
