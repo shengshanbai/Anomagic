@@ -162,9 +162,9 @@ def generate_anomaly(config_path):
         normal_mask_img=Image.open(task["normal_mask_img"]).convert("L")
         reference_mask_img=Image.open(task["reference_mask_img"]).convert("L")
         generated_image=generator.generate_single_image(normal_img,
-                                        reference_image,
+                                        reference_img,
                                         normal_mask_img,
-                                        reference_image,
+                                        reference_mask_img,
                                         prompt,
                                         num_inference_steps=task["steps"],
                                         ip_scale=task["ip_scale"],
